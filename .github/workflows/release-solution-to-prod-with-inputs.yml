@@ -57,7 +57,7 @@ jobs:
       RUNNER_DEBUG: 1
 
     steps:
-    - uses: actions/checkout@v0
+    - uses: actions/checkout@v2
       with:
         lfs: true
 
