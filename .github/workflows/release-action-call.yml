@@ -1,0 +1,36 @@
+name: Release action
+# Call the reusable workflow release-solution-with-inputs.yml
+# Release your solution to prod when you create a new release.
+
+on:
+  release:
+      types: [created]        
+
+jobs:
+  Export-solution-Feedback:
+    uses: ./.github/workflows/export-and-branch-solution.yml
+    with:
+      #You can specify the solution name here
+      solution_name: hello-world
+      solution_exported_folder: out/exported/
+      solution_folder: out/solutions/
+      solution_target_folder: solutions/
+      BUILD_ENVIRONMENT_URL: https://org9e0c36ce.crm8.dynamics.com/
+      CLIENT_ID: 499d54fe-9a09-4326-9570-fb6d0e5055bf 
+      TENANT_ID: bd0edc69-11ea-4701-85eb-20002872112d
+    secrets:
+      envSecret: ${{ secrets.PowerPlatformSPN }}
+
+  Release-solution-Feedback:
+    needs: [ Export-solution-Feedback ]
+    uses: ./.github/workflows/release-solution-to-prod-with-inputs.yml
+    with:
+      #You can specify the solution name here
+      solution_name: hello-world
+      #Update your values here
+      BUILD_ENVIRONMENT_URL: https://org9e0c36ce.crm8.dynamics.com/
+      PRODUCTION_ENVIRONMENT_URL: https://orgb27146a4.crm8.dynamics.com/
+      CLIENT_ID: 499d54fe-9a09-4326-9570-fb6d0e5055bf 
+      TENANT_ID: bd0edc69-11ea-4701-85eb-20002872112d  
+    secrets:
+      envSecret: ${{ secrets.PowerPlatformSPN }}
