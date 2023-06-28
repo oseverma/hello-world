@@ -1,0 +1,97 @@
+name: export-and-branch-solution
+# Export solution from DEV environment
+#  unpack it and prepare, commit and push a git branch with the changes
+
+on:
+  workflow_call:
+    inputs:
+      # Change this value
+      solution_name:
+        type: string
+        description: 'name of the solution to worked on from Power Platform'
+        required: true
+        default: ALMLab
+       #Do Not change these values
+      solution_exported_folder:
+        type: string
+        description: 'folder name for staging the exported solution *do not change*'
+        required: true
+        default: out/exported/
+      solution_folder:
+        type: string
+        description: 'staging the unpacked solution folder before check-in *do not change*'
+        required: true
+        default: out/solutions/
+      solution_target_folder: 
+        type: string
+        description: 'folder name to be created and checked in *do not change*'
+        required: true
+        default: solutions/
+      BUILD_ENVIRONMENT_URL:
+        description: 'Build environment url.'
+        type: string
+        required: true      
+      CLIENT_ID: 
+        description: 'The client id'
+        type: string
+        required: true
+      TENANT_ID: 
+        description: 'The tenant id'
+        type: string
+        required: true
+    secrets:
+      envSecret:
+        description: 'The secret value for authentication using SPN'
+        required: true
+env:
+#edit your values here
+  ENVIRONMENT_URL: 'https://org9e0c36ce.crm8.dynamics.com/'
+  CLIENT_ID: '499d54fe-9a09-4326-9570-fb6d0e5055bf'
+  TENANT_ID: 'bd0edc69-11ea-4701-85eb-20002872112d'
+
+jobs:
+  export-from-dev:
+    runs-on: windows-latest
+    # or you can say runs-on: ubuntu-latest
+    env:
+      RUNNER_DEBUG: 1
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        lfs: true
+
+    - name: who-am-i action
+      uses: microsoft/powerplatform-actions/who-am-i@v0
+      with:
+        environment-url: ${{inputs.BUILD_ENVIRONMENT_URL}}
+        app-id: ${{inputs.CLIENT_ID}}
+        client-secret: ${{ secrets.envSecret }}
+        tenant-id: ${{inputs.TENANT_ID}}
+
+
+    - name: export-solution action
+      uses: microsoft/powerplatform-actions/export-solution@v0
+      with:
+        environment-url: ${{inputs.BUILD_ENVIRONMENT_URL}}
+        app-id: ${{inputs.CLIENT_ID}}
+        client-secret: ${{ secrets.envSecret }}
+        tenant-id: ${{inputs.TENANT_ID}}
+        solution-name: ${{ inputs.solution_name }}
+        solution-output-file: ${{ inputs.solution_exported_folder}}/${{ inputs.solution_name }}.zip
+
+    - name: unpack-solution action
+      uses: microsoft/powerplatform-actions/unpack-solution@v0
+      with:
+        solution-file: ${{ inputs.solution_exported_folder}}/${{ inputs.solution_name }}.zip
+        solution-folder: ${{ inputs.solution_folder}}/${{ inputs.solution_name }}
+        solution-type: 'Unmanaged'
+        overwrite-files: true
+
+    - name: branch-solution, prepare it for a PullRequest
+      uses: microsoft/powerplatform-actions/branch-solution@v0
+      with:
+        solution-folder: ${{ inputs.solution_folder}}/${{ inputs.solution_name }}
+        solution-target-folder: ${{ inputs.solution_target_folder}}/${{ inputs.solution_name }}
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        allow-empty-commit: true
