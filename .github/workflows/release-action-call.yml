@@ -11,7 +11,7 @@ jobs:
     uses: ./.github/workflows/export-and-branch-solution.yml
     with:
       #You can specify the solution name here
-      solution_name: hello-world
+      solution_name: helloworld
       solution_exported_folder: out/exported/
       solution_folder: out/solutions/
       solution_target_folder: solutions/
@@ -26,7 +26,7 @@ jobs:
     uses: ./.github/workflows/release-solution-to-prod-with-inputs.yml
     with:
       #You can specify the solution name here
-      solution_name: hello-world
+      solution_name: helloworld
       #Update your values here
       BUILD_ENVIRONMENT_URL: https://org9e0c36ce.crm8.dynamics.com/
       PRODUCTION_ENVIRONMENT_URL: https://orgb27146a4.crm8.dynamics.com/
